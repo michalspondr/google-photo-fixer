@@ -1,14 +1,47 @@
-# Google Photo Fixer
-Tool for adding EXIF information to photos downloaded from Google Photos.
+# Google Photos Fixer
 
-Original inspiration is from [rpanachi blog](at https://blog.rpanachi.com/how-to-takeout-from-google-photos-and-fix-metadata-exif-info), I've just used AI to convert his code to Python. It worked for me so I've decided to give it to the world.
+This script fixes EXIF metadata in photos downloaded from Google Photos.
+
+## The Problem
+
+When you download your photos from Google Photos using Google Takeout, the EXIF metadata (like the date the photo was taken, GPS location, etc.) is not stored in the image files themselves. Instead, it's saved in separate `.json` files. This means that if you want to use your photos with other applications, they might not be able to read the metadata correctly.
+
+## The Solution
+
+This script uses the EXIF metadata from the `.json` files and writes it back into the corresponding image files. It's based on the original work by [rpanachi](https://github.com/rpanachi), adapted to Python from [this blog post](https://blog.rpanachi.com/how-to-takeout-from-google-photos-and-fix-metadata-exif-info).
 
 ## Dependencies
-- exiftool
+
+*   **exiftool**: A command-line tool for reading and writing EXIF metadata. You can install it from [here](https://exiftool.org/install.html).
 
 ## Usage
-1. Export your data using [https://takeout.google.com](https://takeout.google.com) tool. Download and unpack the file, in this example it's unpacked to directory `Takeout/Google Photos`.
-2. Run this script: `./google-photos-fixer.py Takeout/Google\ Photos`.
-3. Run:
-`exiftool -r -d %s -tagsfromfile "%d/%F.supplemental-metadata.json"   "-GPSAltitude<GeoDataAltitude" "-GPSLatitude<GeoDataLatitude"   "-GPSLatitudeRef<GeoDataLatitude" "-GPSLongitude<GeoDataLongitude"   "-GPSLongitudeRef<GeoDataLongitude" "-Keywords<Tags" "-Subject<Tags"   "-Caption-Abstract<Description" "-ImageDescription<Description"   "-DateTimeOriginal<PhotoTakenTimeTimestamp"   -ext "*" -overwrite_original -progress --ext json -ifd0:all=   Takeout/Google\ Photos/`
 
+1.  **Export your photos from Google Photos:**
+    *   Go to [Google Takeout](https://takeout.google.com).
+    *   Select only "Google Photos".
+    *   Download the exported `.zip` file and unzip it. You should have a directory structure like `Takeout/Google Photos`.
+
+2.  **Run the Python script:**
+
+    ```bash
+    ./google-photos-fixer.py "Takeout/Google Photos"
+    ```
+
+3.  **Run `exiftool` to write the metadata:**
+
+    ```bash
+    exiftool -r -d %s -tagsfromfile "%d/%F.supplemental-metadata.json" \
+       "-GPSAltitude<GeoDataAltitude" "-GPSLatitude<GeoDataLatitude" \
+       "-GPSLatitudeRef<GeoDataLatitude" "-GPSLongitude<GeoDataLongitude" \
+       "-GPSLongitudeRef<GeoDataLongitude" "-Keywords<Tags" "-Subject<Tags" \
+       "-Caption-Abstract<Description" "-ImageDescription<Description" \
+       "-DateTimeOriginal<PhotoTakenTimeTimestamp" \
+       -ext "*" -overwrite_original -progress --ext json -ifd0:all= \
+       "Takeout/Google Photos/"
+    ```
+
+    This command will recursively go through all the files in the `Takeout/Google Photos` directory, find the corresponding `.json` file for each image, and write the metadata from the `.json` file to the image.
+
+## Contributing
+
+Contributions are welcome! If you have any ideas for improvements, please open an issue or submit a pull request.
